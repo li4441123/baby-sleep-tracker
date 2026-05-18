@@ -634,8 +634,7 @@ h3 {
   margin-left: 8px;
 }
 
-.two-fields,
-.position-editor-fields {
+.two-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
@@ -643,35 +642,88 @@ h3 {
 
 .position-editor {
   display: grid;
-  gap: 10px;
-  padding: 12px;
-  margin: 10px 0;
-  border: 1px solid rgba(70, 90, 85, 0.1);
+  gap: 8px;
+  padding: 12px 12px 14px;
+  margin: 12px 0;
+  border: 1px solid rgba(70, 90, 85, 0.12);
   border-radius: 8px;
-  background: rgba(247, 243, 236, 0.46);
+  background: linear-gradient(180deg, rgba(247, 243, 236, 0.72), rgba(255, 252, 245, 0.68));
 }
 
-.position-editor-tools {
+.position-editor-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  min-height: 28px;
 }
 
-.position-editor-tools label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.position-editor-head span {
   color: #7a857e;
   font-size: 13px;
+  font-weight: 800;
 }
 
-.position-editor button {
+.position-editor-head button {
   border: 0;
   color: #d98b73;
   background: transparent;
   font-size: 13px;
   font-weight: 800;
+}
+
+.position-editor-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.form-block {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  min-height: 58px;
+  border-bottom: 1px solid rgba(70, 90, 85, 0.08);
+  color: #465a55;
+  font-size: 15px;
+}
+
+.form-block input {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(70, 90, 85, 0.12);
+  border-radius: 8px;
+  outline: 0;
+  color: #283631;
+  background: rgba(247, 243, 236, 0.72);
+  text-align: left;
+}
+
+.percent-block {
+  grid-template-columns: 58px minmax(0, 1fr) 20px;
+}
+
+.percent-block em {
+  color: #465a55;
+  font-style: normal;
+  text-align: center;
+}
+
+.color-picker {
+  display: grid;
+  grid-template-columns: 42px 38px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 58px;
+  padding: 0 10px 0 12px;
+  border: 1px solid rgba(70, 90, 85, 0.12);
+  border-radius: 8px;
+  color: #7a857e;
+  background: rgba(247, 243, 236, 0.72);
+  font-size: 13px;
 }
 
 .color-input {
@@ -726,7 +778,8 @@ h3 {
     grid-template-columns: 1fr;
   }
 
-  .position-editor-fields {
+  .position-editor-row,
+  .two-fields {
     grid-template-columns: 1fr;
   }
 }
