@@ -281,10 +281,17 @@
       <h2>{{ editingPlanId ? '编辑方案' : '新增方案' }}</h2>
       <van-field v-model="planForm.name" label="方案名" placeholder="例如 头型调整第二阶段" />
       <div v-for="(item, index) in planForm.positions" :key="item.id" class="position-editor">
-        <van-field v-model="item.name" label="睡姿" placeholder="左侧睡" />
-        <van-field v-model.number="item.targetPercent" label="目标%" type="number" />
-        <input v-model="item.color" class="color-input" type="color" />
-        <button type="button" @click="removePlanPosition(index)">删除</button>
+        <div class="position-editor-fields">
+          <van-field v-model="item.name" label="睡姿" placeholder="左侧睡" />
+          <van-field v-model.number="item.targetPercent" label="目标%" type="number" />
+        </div>
+        <div class="position-editor-tools">
+          <label>
+            <span>颜色</span>
+            <input v-model="item.color" class="color-input" type="color" />
+          </label>
+          <button type="button" @click="removePlanPosition(index)">删除</button>
+        </div>
       </div>
       <div class="sheet-subline">目标合计：{{ targetTotal }}%</div>
       <div class="action-row">

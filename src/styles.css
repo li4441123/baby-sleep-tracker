@@ -28,6 +28,13 @@ select {
   font: inherit;
 }
 
+input,
+select,
+textarea,
+.van-field__control {
+  font-size: 16px !important;
+}
+
 .app-shell {
   min-height: 100vh;
   max-width: 520px;
@@ -573,17 +580,90 @@ h3 {
   margin-bottom: 16px;
 }
 
+.sheet .van-cell {
+  align-items: center;
+  min-height: 58px;
+  padding: 12px 0;
+  background: transparent;
+}
+
+.sheet .van-field__label {
+  width: 70px;
+  color: #465a55;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.sheet .van-field__body {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(70, 90, 85, 0.12);
+  border-radius: 8px;
+  background: rgba(247, 243, 236, 0.72);
+}
+
+.sheet .van-field__control {
+  width: 100%;
+  color: #283631;
+  text-align: left;
+}
+
+.sheet .van-field__control::placeholder {
+  color: #a7aca7;
+}
+
+.sheet input[type="date"],
+.sheet input[type="datetime-local"],
+.sheet input[type="number"],
+.sheet input[type="text"] {
+  min-height: 42px;
+  text-align: left;
+}
+
+.sheet input::-webkit-date-and-time-value {
+  min-height: 1.5em;
+  text-align: left;
+}
+
+.sheet input::-webkit-datetime-edit,
+.sheet input::-webkit-datetime-edit-fields-wrapper {
+  text-align: left;
+}
+
+.sheet input::-webkit-calendar-picker-indicator {
+  margin-left: 8px;
+}
+
 .two-fields,
-.position-editor {
+.position-editor-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
 .position-editor {
-  grid-template-columns: 1fr 92px 44px 48px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid rgba(70, 90, 85, 0.1);
+  border-radius: 8px;
+  background: rgba(247, 243, 236, 0.46);
+}
+
+.position-editor-tools {
+  display: flex;
   align-items: center;
-  padding: 8px 0;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.position-editor-tools label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #7a857e;
+  font-size: 13px;
 }
 
 .position-editor button {
@@ -616,10 +696,18 @@ h3 {
 
 .native-select {
   width: 100%;
+  min-height: 42px;
   border: 0;
   outline: 0;
-  background: transparent;
+  background:
+    linear-gradient(45deg, transparent 50%, #7a857e 50%) calc(100% - 14px) 18px / 6px 6px no-repeat,
+    linear-gradient(135deg, #7a857e 50%, transparent 50%) calc(100% - 9px) 18px / 6px 6px no-repeat;
   color: inherit;
+  text-align: left;
+  text-align-last: left;
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 28px;
 }
 
 .file-input {
@@ -638,7 +726,7 @@ h3 {
     grid-template-columns: 1fr;
   }
 
-  .position-editor {
-    grid-template-columns: 1fr 80px;
+  .position-editor-fields {
+    grid-template-columns: 1fr;
   }
 }
