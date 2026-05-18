@@ -56,11 +56,11 @@
             block
             color="#7c9a92"
             :disabled="!canStart"
-            @click="startSleep"
+            @click="openStartEditor"
           >
             开始睡眠
           </van-button>
-          <van-button v-else round block color="#d98b73" @click="finishSleep">结束睡眠</van-button>
+          <van-button v-else round block color="#d98b73" @click="openFinishEditor">结束睡眠</van-button>
           <van-button round block plain color="#7c9a92" @click="openManualEditor()">补录</van-button>
         </div>
 
@@ -339,6 +339,34 @@
         <van-button round block color="#7c9a92" @click="saveRecord">保存</van-button>
       </div>
     </van-popup>
+
+    <van-popup v-model:show="showStartEditor" round position="bottom" class="sheet compact-sheet">
+      <h2>开始睡眠</h2>
+      <div class="start-summary" v-if="currentPlan && pendingPosition">
+        <span :style="{ background: pendingPosition.color }" />
+        <div>
+          <strong>{{ pendingPosition.name }}</strong>
+          <p>{{ currentPlan.name }}</p>
+        </div>
+      </div>
+      <van-field v-model="startForm.startedAt" label="开始" type="datetime-local" />
+      <div class="sheet-tip">默认是当前时间，可以按实际入睡时间往前调整。</div>
+      <van-button round block color="#7c9a92" @click="startSleep">确认开始</van-button>
+    </van-popup>
+
+    <van-popup v-model:show="showFinishEditor" round position="bottom" class="sheet compact-sheet">
+      <h2>结束睡眠</h2>
+      <div class="start-summary" v-if="runningRecord">
+        <span :style="{ background: positionColor(runningRecord.positionId) }" />
+        <div>
+          <strong>{{ positionName(runningRecord.positionId) }}</strong>
+          <p>开始于 {{ formatDateTime(runningRecord.startedAt) }}</p>
+        </div>
+      </div>
+      <van-field v-model="finishForm.endedAt" label="结束" type="datetime-local" />
+      <div class="sheet-tip">默认是当前时间，可以按实际醒来时间调整。</div>
+      <van-button round block color="#d98b73" @click="finishSleep">确认结束</van-button>
+    </van-popup>
   </main>
 </template>
 
@@ -382,6 +410,8 @@ const fileInput = ref<HTMLInputElement>()
 const showBabyEditor = ref(false)
 const showPlanEditor = ref(false)
 const showRecordEditor = ref(false)
+const showStartEditor = ref(false)
+const showFinishEditor = ref(false)
 const editingBabyId = ref('')
 const editingPlanId = ref('')
 const editingRecordId = ref('')
@@ -389,11 +419,14 @@ const editingRecordId = ref('')
 const babyForm = reactive({ name: '', birthday: '', gestationalWeeks: 39, gestationalDays: 0 })
 const planForm = reactive<{ name: string; positions: Array<{ id: string; name: string; targetPercent: number; color: string }> }>({ name: '', positions: [] })
 const recordForm = reactive({ startedAt: '', endedAt: '', planId: '', positionId: '', note: '' })
+const startForm = reactive({ startedAt: '' })
+const finishForm = reactive({ endedAt: '' })
 
 const selectedBaby = computed(() => babies.value.find((baby) => baby.id === settings.selectedBabyId) || babies.value[0])
 const babyPlans = computed(() => plans.value.filter((plan) => plan.babyId === selectedBaby.value?.id))
 const currentPlan = computed(() => babyPlans.value.find((plan) => plan.id === selectedBaby.value?.currentPlanId) || babyPlans.value[0])
 const runningRecord = computed(() => records.value.find((record) => record.babyId === selectedBaby.value?.id && !record.endedAt))
+const pendingPosition = computed(() => currentPlan.value?.positions.find((item) => item.id === selectedPositionId.value))
 const sortedRecords = computed(() => records.value.filter((record) => record.babyId === selectedBaby.value?.id && record.planId === currentPlan.value?.id).sort((a, b) => b.startedAt.localeCompare(a.startedAt)))
 const todayRecords = computed(() => sortedRecords.value.filter((record) => record.endedAt && dateKey(record.endedAt) === dateKey(new Date())))
 const statsDays = computed(() => [1, 7, 30][statsDaysIndex.value])
@@ -489,26 +522,54 @@ async function selectBaby(babyId: string) {
   await refresh()
 }
 
+function openStartEditor() {
+  if (!canStart.value) return
+  startForm.startedAt = toDateTimeLocalValue()
+  showStartEditor.value = true
+}
+
 async function startSleep() {
   if (!canStart.value || !selectedBaby.value || !currentPlan.value) return
   const timestamp = nowIso()
+  const startedAt = fromDateTimeLocalValue(startForm.startedAt)
+  if (new Date(startedAt).getTime() > Date.now() + 60000) {
+    showToast('开始时间不能晚于当前时间')
+    return
+  }
   await db.records.add({
     id: createId('sleep'),
     babyId: selectedBaby.value.id,
     planId: currentPlan.value.id,
     positionId: selectedPositionId.value,
-    startedAt: timestamp,
+    startedAt,
     source: 'live',
     createdAt: timestamp,
     updatedAt: timestamp,
   })
+  showStartEditor.value = false
   await refresh()
+}
+
+function openFinishEditor() {
+  if (!runningRecord.value) return
+  finishForm.endedAt = toDateTimeLocalValue()
+  showFinishEditor.value = true
 }
 
 async function finishSleep() {
   if (!runningRecord.value) return
-  const updated = { ...runningRecord.value, endedAt: nowIso(), updatedAt: nowIso() }
+  const endedAt = fromDateTimeLocalValue(finishForm.endedAt)
+  if (new Date(endedAt) <= new Date(runningRecord.value.startedAt)) {
+    showToast('结束时间要晚于开始时间')
+    return
+  }
+  if (new Date(endedAt).getTime() > Date.now() + 60000) {
+    showToast('结束时间不能晚于当前时间')
+    return
+  }
+  const updated = { ...runningRecord.value, endedAt, updatedAt: nowIso() }
   await db.records.put(updated)
+  showFinishEditor.value = false
   await refresh()
 }
 
@@ -671,6 +732,10 @@ async function saveBaby() {
 
 function positionName(positionId: string) {
   return plans.value.flatMap((plan) => plan.positions).find((item) => item.id === positionId)?.name || '未知睡姿'
+}
+
+function positionColor(positionId: string) {
+  return plans.value.flatMap((plan) => plan.positions).find((item) => item.id === positionId)?.color || '#7c9a92'
 }
 
 function timelineStyle(record: SleepRecord) {
