@@ -1,0 +1,18 @@
+{
+  "name": "宝宝睡眠记录",
+  "short_name": "宝宝睡眠",
+  "description": "记录宝宝睡眠时间和睡姿方案达成情况",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f3ec",
+  "theme_color": "#7c9a92",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

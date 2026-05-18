@@ -1,0 +1,23 @@
+{
+  "name": "baby-sleep-position-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --configLoader native",
+    "build": "vue-tsc --noEmit && vite build --config vite.config.mjs --configLoader native",
+    "preview": "vite preview --host 0.0.0.0 --config vite.config.mjs --configLoader native"
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.16.0",
+    "@vitejs/plugin-vue": "^6.0.2",
+    "dexie": "^4.2.1",
+    "vant": "^4.9.22",
+    "vite": "^7.2.4",
+    "vue": "^3.5.25"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.1.7"
+  }
+}
