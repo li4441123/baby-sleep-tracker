@@ -486,6 +486,12 @@ h3 {
   font-size: 12px;
 }
 
+.danger-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
 .list-tile p,
 .baby-card p {
   margin-bottom: 4px;

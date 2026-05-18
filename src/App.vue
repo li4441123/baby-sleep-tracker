@@ -251,7 +251,9 @@
             <span>仅影响当前设备</span>
           </div>
           <p class="muted">清空后宝宝、方案、睡眠记录都会从当前浏览器删除。建议先导出备份。</p>
-          <van-button round block plain color="#d98b73" @click="clearLocalData">清空本机数据</van-button>
+          <div class="danger-action">
+            <van-button size="small" round plain color="#d98b73" @click="clearLocalData">清空本机数据</van-button>
+          </div>
         </section>
       </section>
     </template>
