@@ -167,7 +167,7 @@
       <section v-if="activeTab === 'plans'" class="page">
         <div class="section-title">
           <h3>睡姿方案</h3>
-          <van-button size="small" round color="#7c9a92" @click="openPlanEditor()">新增方案</van-button>
+          <van-button class="primary-mini-button" size="small" round color="#7c9a92" @click="openPlanEditor()">新增方案</van-button>
         </div>
         <div v-if="!babyPlans.length" class="empty-state">
           <h2>还没有睡姿方案</h2>
@@ -190,7 +190,7 @@
       <section v-if="activeTab === 'records'" class="page">
         <div class="section-title">
           <h3>睡眠记录</h3>
-          <van-button size="small" round color="#7c9a92" @click="openManualEditor()">补录</van-button>
+          <van-button class="primary-mini-button" size="small" round color="#7c9a92" @click="openManualEditor()">补录</van-button>
         </div>
         <div v-for="record in sortedRecords" :key="record.id" class="list-tile" @click="openRecordEditor(record)">
           <div>
@@ -243,6 +243,15 @@
             <van-button round block plain color="#7c9a92" @click="triggerImport">导入</van-button>
           </div>
           <input ref="fileInput" class="file-input" type="file" accept="application/json" @change="handleImport" />
+        </section>
+
+        <section class="panel">
+          <div class="section-title">
+            <h3>本机数据</h3>
+            <span>仅影响当前设备</span>
+          </div>
+          <p class="muted">清空后宝宝、方案、睡眠记录都会从当前浏览器删除。建议先导出备份。</p>
+          <van-button round block plain color="#d98b73" @click="clearLocalData">清空本机数据</van-button>
         </section>
       </section>
     </template>
@@ -685,6 +694,22 @@ async function handleImport(event: Event) {
   const result = await importBackup(payload)
   showToast(`导入完成：新增${result.recordsAdded}条，跳过${result.recordsSkipped}条重复`)
   await refresh()
+}
+
+async function clearLocalData() {
+  await showConfirmDialog({
+    title: '清空本机数据',
+    message: '会删除当前设备里的宝宝、睡姿方案和睡眠记录。建议确认已经备份后再继续。',
+  })
+  await db.transaction('rw', db.babies, db.plans, db.records, db.settings, async () => {
+    await db.records.clear()
+    await db.plans.clear()
+    await db.babies.clear()
+    await db.settings.clear()
+  })
+  await refresh()
+  activeTab.value = 'home'
+  showToast('已清空本机数据')
 }
 
 onMounted(async () => {

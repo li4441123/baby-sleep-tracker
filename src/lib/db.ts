@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import type { AppSettings, Baby, BackupPayload, PositionPlan, SleepRecord } from '../types'
-import { createId, nowIso } from './time'
+import { nowIso } from './time'
 
 class BabySleepDb extends Dexie {
   babies!: Table<Baby, string>
@@ -31,42 +31,7 @@ export async function loadSettings() {
 }
 
 export async function seedIfEmpty() {
-  const count = await db.babies.count()
-  if (count > 0) return
-
-  const timestamp = nowIso()
-  const babyId = createId('baby')
-  const planId = createId('plan')
-  const leftId = createId('pos')
-  const rightId = createId('pos')
-  const baby: Baby = {
-    id: babyId,
-    name: '小月亮',
-    birthday: new Date().toISOString().slice(0, 10),
-    gestationalWeeks: 39,
-    gestationalDays: 0,
-    currentPlanId: planId,
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  }
-  const plan: PositionPlan = {
-    id: planId,
-    babyId,
-    name: '头型调整第一阶段',
-    status: 'active',
-    positions: [
-      { id: leftId, name: '左侧睡', targetPercent: 75, color: '#7c9a92' },
-      { id: rightId, name: '右侧睡', targetPercent: 25, color: '#d98b73' },
-    ],
-    createdAt: timestamp,
-    updatedAt: timestamp,
-  }
-
-  await db.transaction('rw', db.babies, db.plans, db.settings, async () => {
-    await db.babies.add(baby)
-    await db.plans.add(plan)
-    await db.settings.put({ id: 'settings', selectedBabyId: babyId, darkMode: false })
-  })
+  await loadSettings()
 }
 
 export async function exportBackup(): Promise<BackupPayload> {
