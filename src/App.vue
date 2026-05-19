@@ -19,8 +19,12 @@
 
     <section v-if="!selectedBaby" class="empty-state">
       <h2>先添加宝宝资料</h2>
-      <p>添加后就可以建立睡姿方案，并开始记录睡眠。</p>
-      <van-button round block color="#7c9a92" @click="openBabyEditor()">添加宝宝</van-button>
+      <p>添加后就可以建立睡姿方案；如果你已有备份，也可以直接导入恢复数据。</p>
+      <div class="action-row">
+        <van-button round block color="#7c9a92" @click="openBabyEditor()">添加宝宝</van-button>
+        <van-button round block plain color="#7c9a92" @click="triggerImport">导入备份</van-button>
+      </div>
+      <input ref="fileInput" class="file-input" type="file" accept="application/json" @change="handleImport" />
     </section>
 
     <template v-else>
@@ -119,7 +123,7 @@
             <div v-for="item in activeStats.positions" :key="item.id">
               <i :style="{ background: item.color }" />
               <span>{{ item.name }}</span>
-              <strong>{{ item.actualPercent }}%</strong>
+              <strong>{{ formatPercent(item.actualPercent) }}%</strong>
             </div>
           </div>
         </section>
@@ -146,7 +150,9 @@
           <div v-for="item in activeStats.positions" :key="item.id" class="stat-line">
             <div class="stat-line-head">
               <strong>{{ item.name }}</strong>
-              <span :class="{ done: item.completed }">{{ item.completed ? '已完成' : `${Math.abs(item.deltaPercent)}%差距` }}</span>
+              <span :class="{ done: item.completed }">
+                {{ item.completed ? '已完成' : activeStats.totalMs ? `${formatPercent(item.catchUpPercent)}%差距 · 还差约${formatDuration(item.catchUpMs)}` : '暂无数据' }}
+              </span>
             </div>
             <van-progress
               :percentage="Math.min(100, item.actualPercent)"
@@ -156,7 +162,7 @@
               :show-pivot="false"
             />
             <div class="stat-meta">
-              <span>实际 {{ item.actualPercent }}%</span>
+              <span>实际 {{ formatPercent(item.actualPercent) }}%</span>
               <span>目标 {{ item.targetPercent }}%</span>
               <span>{{ formatDuration(item.durationMs) }}</span>
             </div>
@@ -384,7 +390,7 @@ import {
   nowIso,
   toDateTimeLocalValue,
 } from './lib/time'
-import { calculateStats, targetHint } from './lib/stats'
+import { calculateStats, formatPercent, targetHint } from './lib/stats'
 import { BarChart3, Baby as BabyIcon, ClipboardList, Home, Moon, Settings, Sun } from '@lucide/vue'
 
 type TabKey = 'home' | 'stats' | 'plans' | 'records' | 'settings'
@@ -461,7 +467,7 @@ const dayBars = computed(() => {
     return {
       key,
       label: key.slice(5).replace('-', '/'),
-      percent: Math.max(ms ? 8 : 0, Math.round((ms / max) * 100)),
+      percent: Math.max(ms ? 8 : 0, Math.trunc((ms / max) * 100)),
       short: ms ? formatDuration(ms).replace('小时', 'h').replace('分钟', 'm') : '0',
     }
   })

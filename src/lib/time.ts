@@ -50,7 +50,8 @@ export function formatDateTime(iso?: string) {
 
 export function formatDuration(ms: number) {
   if (!Number.isFinite(ms) || ms <= 0) return '0分钟'
-  const minutes = Math.round(ms / 60000)
+  const minutes = Math.floor(ms / 60000)
+  if (minutes <= 0) return '不足1分钟'
   const h = Math.floor(minutes / 60)
   const m = minutes % 60
   if (h <= 0) return `${m}分钟`

@@ -9,6 +9,8 @@ export interface PositionStat {
   durationMs: number
   actualPercent: number
   deltaPercent: number
+  catchUpPercent: number
+  catchUpMs: number
   completed: boolean
 }
 
@@ -46,13 +48,22 @@ export function calculateStats(plan: PositionPlan | undefined, records: SleepRec
   const totalMs = Array.from(byPosition.values()).reduce((sum, ms) => sum + ms, 0)
   const positions = (plan?.positions || []).map((position) => {
     const durationMs = byPosition.get(position.id) || 0
-    const actualPercent = totalMs ? Math.round((durationMs / totalMs) * 1000) / 10 : 0
-    const deltaPercent = Math.round((actualPercent - position.targetPercent) * 10) / 10
+    const actualPercent = totalMs ? (durationMs / totalMs) * 100 : 0
+    const deltaPercent = actualPercent - position.targetPercent
+    const targetRatio = position.targetPercent / 100
+    const targetMsAtCurrentTotal = totalMs * targetRatio
+    const catchUpMs =
+      totalMs > 0 && durationMs < targetMsAtCurrentTotal && targetRatio < 1
+        ? Math.max(0, (targetMsAtCurrentTotal - durationMs) / (1 - targetRatio))
+        : 0
+    const catchUpPercent = totalMs ? (catchUpMs / totalMs) * 100 : 0
     return {
       ...position,
       durationMs,
       actualPercent,
       deltaPercent,
+      catchUpPercent,
+      catchUpMs,
       completed: totalMs > 0 && actualPercent >= position.targetPercent,
     }
   })
@@ -64,9 +75,14 @@ export function targetHint(stats: StatsResult) {
   if (!stats.totalMs) return '今天还没有睡眠记录'
   const mostBehind = stats.positions
     .filter((item) => !item.completed)
-    .sort((a, b) => a.deltaPercent - b.deltaPercent)[0]
+    .sort((a, b) => b.catchUpMs - a.catchUpMs)[0]
   if (!mostBehind) return '当前方案目标已完成'
-  const expectedMs = stats.totalMs * (mostBehind.targetPercent / 100)
-  const missingMs = Math.max(0, expectedMs - mostBehind.durationMs)
-  return `${mostBehind.name}还差约 ${formatDuration(missingMs)}`
+  return `${mostBehind.name}还差约 ${formatDuration(mostBehind.catchUpMs)}`
+}
+
+export function formatPercent(value: number, digits = 1) {
+  if (!Number.isFinite(value)) return '0'
+  const factor = 10 ** digits
+  const truncated = Math.trunc(value * factor) / factor
+  return truncated.toFixed(digits).replace(/\.?0+$/, '')
 }
