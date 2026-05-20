@@ -301,10 +301,20 @@ h3 {
 .date-filter-panel {
   display: grid;
   gap: 12px;
+  overflow: hidden;
+}
+
+.date-filter-wrap {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .date-filter-input {
+  display: block;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 46px;
   padding: 0 14px;
   border: 1px solid rgba(70, 90, 85, 0.12);
@@ -313,6 +323,9 @@ h3 {
   color: #283631;
   background: rgba(247, 243, 236, 0.72);
   text-align: left;
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
 }
 
 .stat-summary h2 {

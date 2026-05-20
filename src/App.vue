@@ -102,7 +102,9 @@
             <h3>查看日期</h3>
             <span>按结束日期统计</span>
           </div>
-          <input v-model="selectedStatsDate" class="date-filter-input" type="date" />
+          <div class="date-filter-wrap">
+            <input v-model="selectedStatsDate" class="date-filter-input" type="date" />
+          </div>
         </section>
         <div class="stat-summary">
           <div>
