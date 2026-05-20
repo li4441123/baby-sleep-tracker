@@ -298,6 +298,23 @@ h3 {
   padding: 18px;
 }
 
+.date-filter-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.date-filter-input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(70, 90, 85, 0.12);
+  border-radius: 8px;
+  outline: 0;
+  color: #283631;
+  background: rgba(247, 243, 236, 0.72);
+  text-align: left;
+}
+
 .stat-summary h2 {
   margin: 0;
   font-size: 30px;

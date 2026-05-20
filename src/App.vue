@@ -95,12 +95,20 @@
           <van-tab title="今日" />
           <van-tab title="近7天" />
           <van-tab title="近30天" />
+          <van-tab title="指定日期" />
         </van-tabs>
+        <section v-if="isSingleDayStats" class="panel date-filter-panel">
+          <div class="section-title">
+            <h3>查看日期</h3>
+            <span>按结束日期统计</span>
+          </div>
+          <input v-model="selectedStatsDate" class="date-filter-input" type="date" />
+        </section>
         <div class="stat-summary">
           <div>
             <p class="muted">总睡眠</p>
             <h2>{{ formatDuration(activeStats.totalMs) }}</h2>
-            <p class="muted">{{ currentPlan?.name }}</p>
+            <p class="muted">{{ currentPlan?.name }} · {{ statsRangeLabel }}</p>
           </div>
           <div class="ring" :style="ringStyle">
             <span>{{ completionCount }}/{{ activeStats.positions.length }}</span>
@@ -110,7 +118,7 @@
         <section class="panel">
           <div class="section-title">
             <h3>占比概览</h3>
-            <span>{{ statsDays === 1 ? '今日' : `${statsDays}天` }}</span>
+            <span>{{ statsRangeLabel }}</span>
           </div>
           <div class="stacked-bar" aria-label="睡姿占比">
             <div
@@ -390,7 +398,7 @@ import {
   nowIso,
   toDateTimeLocalValue,
 } from './lib/time'
-import { calculateStats, formatPercent, targetHint } from './lib/stats'
+import { calculateStats, calculateStatsForDate, formatPercent, targetHint } from './lib/stats'
 import { BarChart3, Baby as BabyIcon, ClipboardList, Home, Moon, Settings, Sun } from '@lucide/vue'
 
 type TabKey = 'home' | 'stats' | 'plans' | 'records' | 'settings'
@@ -410,6 +418,7 @@ const records = ref<SleepRecord[]>([])
 const settings = reactive({ id: 'settings' as const, selectedBabyId: undefined as string | undefined, lastBackupAt: undefined as string | undefined, darkMode: false })
 const selectedPositionId = ref('')
 const statsDaysIndex = ref(0)
+const selectedStatsDate = ref(dateKey(new Date()))
 const liveNow = ref(Date.now())
 const fileInput = ref<HTMLInputElement>()
 
@@ -435,8 +444,13 @@ const runningRecord = computed(() => records.value.find((record) => record.babyI
 const pendingPosition = computed(() => currentPlan.value?.positions.find((item) => item.id === selectedPositionId.value))
 const sortedRecords = computed(() => records.value.filter((record) => record.babyId === selectedBaby.value?.id && record.planId === currentPlan.value?.id).sort((a, b) => b.startedAt.localeCompare(a.startedAt)))
 const todayRecords = computed(() => sortedRecords.value.filter((record) => record.endedAt && dateKey(record.endedAt) === dateKey(new Date())))
-const statsDays = computed(() => [1, 7, 30][statsDaysIndex.value])
-const activeStats = computed(() => calculateStats(currentPlan.value, records.value, statsDays.value))
+const statsDays = computed(() => [1, 7, 30][statsDaysIndex.value] || 1)
+const isSingleDayStats = computed(() => statsDaysIndex.value === 3)
+const activeStats = computed(() =>
+  isSingleDayStats.value
+    ? calculateStatsForDate(currentPlan.value, records.value, selectedStatsDate.value)
+    : calculateStats(currentPlan.value, records.value, statsDays.value),
+)
 const todayStats = computed(() => calculateStats(currentPlan.value, records.value, 1))
 const todayTotalText = computed(() => formatDuration(todayStats.value.totalMs))
 const todayHint = computed(() => targetHint(todayStats.value))
@@ -454,7 +468,21 @@ const ringStyle = computed(() => {
   return { background: `conic-gradient(${slices.join(', ') || '#d8d2c6 0 100%'})` }
 })
 const liveDuration = computed(() => runningRecord.value ? formatDuration(liveNow.value - new Date(runningRecord.value.startedAt).getTime()) : '0分钟')
+const statsRangeLabel = computed(() => {
+  if (isSingleDayStats.value) return selectedStatsDate.value
+  if (statsDays.value === 1) return '今日'
+  return `近${statsDays.value}天`
+})
 const dayBars = computed(() => {
+  if (isSingleDayStats.value) {
+    const ms = activeStats.value.days[selectedStatsDate.value] || 0
+    return [{
+      key: selectedStatsDate.value,
+      label: selectedStatsDate.value.slice(5).replace('-', '/'),
+      percent: ms ? 100 : 0,
+      short: ms ? formatDuration(ms).replace('小时', 'h').replace('分钟', 'm') : '0',
+    }]
+  }
   const today = new Date()
   const keys = Array.from({ length: statsDays.value }, (_, index) => {
     const date = new Date(today)

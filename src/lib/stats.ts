@@ -34,6 +34,16 @@ export function calculateStats(plan: PositionPlan | undefined, records: SleepRec
   const today = startOfDay(new Date())
   const from = addDays(today, -(days - 1))
   const to = endOfDay(today)
+  return calculateStatsBetween(plan, records, from, to)
+}
+
+export function calculateStatsForDate(plan: PositionPlan | undefined, records: SleepRecord[], day: string): StatsResult {
+  const from = startOfDay(day)
+  const to = endOfDay(day)
+  return calculateStatsBetween(plan, records, from, to)
+}
+
+function calculateStatsBetween(plan: PositionPlan | undefined, records: SleepRecord[], from: Date, to: Date): StatsResult {
   const relevant = records.filter((record) => record.planId === plan?.id && record.startedAt && record.endedAt)
   const byPosition = new Map<string, number>()
   const byDay: Record<string, number> = {}
