@@ -103,7 +103,10 @@
             <span>按结束日期统计</span>
           </div>
           <div class="date-filter-wrap">
-            <input v-model="selectedStatsDate" class="date-filter-input" type="date" />
+            <label class="date-filter-control">
+              <span>{{ selectedStatsDate }}</span>
+              <input v-model="selectedStatsDate" class="date-filter-input" type="date" aria-label="选择统计日期" />
+            </label>
           </div>
         </section>
         <div class="stat-summary">

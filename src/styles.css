@@ -310,22 +310,44 @@ h3 {
   overflow: hidden;
 }
 
+.date-filter-control {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(70, 90, 85, 0.12);
+  border-radius: 8px;
+  color: #283631;
+  background: rgba(247, 243, 236, 0.72);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: left;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.date-filter-control span {
+  pointer-events: none;
+}
+
 .date-filter-input {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   min-height: 46px;
-  padding: 0 14px;
-  border: 1px solid rgba(70, 90, 85, 0.12);
-  border-radius: 8px;
+  padding: 0;
+  border: 0;
   outline: 0;
-  color: #283631;
-  background: rgba(247, 243, 236, 0.72);
-  text-align: left;
+  opacity: 0;
   -webkit-appearance: none;
   appearance: none;
   box-sizing: border-box;
+  cursor: pointer;
 }
 
 .stat-summary h2 {
